@@ -29,6 +29,20 @@ int sign(float v){
         return 0;
 }
 
+void printVec(std::vector<float> myVec){
+    for (auto a: myVec){
+        std::cout << a << " ";
+    }
+    std::cout << "\n";
+}
+
+void printArr(float *arr, size_t len){
+    for (int i = 0; i < len; i++){
+        std::cout << arr[i] << " ";
+    }
+    std::cout << "\n";
+}
+
 /*
  Class member functions
  */
@@ -49,8 +63,6 @@ PeaksAndValleys::PeaksAndValleys(float *signal, unsigned int signalLength){
     
     sigPointer = &signal;
     
-    std::cout << "Create constructor" << std::endl;
-    
     computeParams(signal, signalLength);
     
 }
@@ -62,7 +74,7 @@ PeaksAndValleys::~PeaksAndValleys(){
     delete slope;
     delete peaks;
     delete valleys;
-    delete sigPointer;
+//    delete sigPointer;
     
 }
 
@@ -70,38 +82,40 @@ void PeaksAndValleys::computeParams(float *signal, unsigned int signalLength){
     
     int i, j;
     
-    // Initialization values
-    float slopes[signalLength];
+    // Initialize all values to -1
+    float initValue[signalLength];
     for (i = 0; i < signalLength; i++){
-        slopes[i] -= 1.0;
+        initValue[i] -= 1.0;
     }
+    std::cout << "Init values: "; printArr(initValue, signalLength);
+    
     int len = signalLength - 1;
     
-    std::cout << "Len: " << len << std::endl;
-    
-    // Compute slopes
+    // Compute slopes array (has length = len)
+    float slopes[len];
     for (i = 0; i < len; i++){
-        slopes[i] = 0.5*(slopes[i+1] - slopes[i]);
+        slopes[i] = 0.5*(signal[i+1] - signal[i]);
     }
+    std::cout << "Slope values: "; printArr(slopes, len);
     
-    std::cout << "Slope stuff" << std::endl;
-    
+    // The structs are set to -1
     for (i = 0; i < signalLength; i++){
-        peaks->idx.push_back(slopes[i]);
-        peaks->mag.push_back(slopes[i]);
-        valleys->idx.push_back(slopes[i]);
-        valleys->mag.push_back(slopes[i]);
+        peaks->idx.push_back(initValue[i]);
+        peaks->mag.push_back(initValue[i]);
+        valleys->idx.push_back(initValue[i]);
+        valleys->mag.push_back(initValue[i]);
     }
     
-    std::cout << "Vec assignment" << std::endl;
+    std::cout << "Peaks idx: "; printVec(peaks->idx);
+    std::cout << "Peaks mag: "; printVec(peaks->mag);
+    std::cout << "Valleys idx: "; printVec(valleys->idx);
+    std::cout << "Valleys mag: "; printVec(valleys->mag);
     
     // Find slopes changes
     if (slopes[0] > 0)
         slopePos(slopes);
     else
         slopeNeg(slopes);
-    
-    std::cout << "Pos/neg stuff" << std::endl;
     
     if (!prevSlopePos){
         for (j = 0; j < len; i++){
@@ -114,14 +128,11 @@ void PeaksAndValleys::computeParams(float *signal, unsigned int signalLength){
     }
     
     cntPeak = cntPeak - 1;
-    
-    /*
-     peaks.idx   = peaks.idx(1:cntPeak);
-     peaks.mag   = peaks.mag(1:cntPeak);
-     
-     valleys.idx = valleys.idx(1:(cntPeak+1));
-     valleys.mag = valleys.mag(1:(cntPeak+1));
-     */
+
+    peaks->idx.resize(cntPeak);
+    peaks->mag.resize(cntPeak);
+    valleys->idx.resize(cntPeak+1);
+    valleys->mag.resize(cntPeak+1);
     
     analysis();
     
@@ -187,7 +198,7 @@ void PeaksAndValleys::slopePos(float *slopes){
 void PeaksAndValleys::updatePeaks(int k){
     
     peaks->idx.at(cntPeak) = k;
-    peaks->mag.at(cntPeak) = *sigPointer[k];
+    peaks->mag.at(cntPeak) = (*sigPointer)[k];
     
     cntPeak = cntPeak + 1;
 }
@@ -240,19 +251,19 @@ void PeaksAndValleys::analysis(){
     // Need to access the height paramater from peaks
     size_t len1 = peaks->mag.size();
     for (i = 0; i < len1; i++){
-//        use calloc for memory allocation
+        //use calloc for memory allocation
         peaks->height.left.push_back(0.0);
         peaks->height.right.push_back(0.0);
     }
     
     for (k = 0; k < len1; k++){
+        
         diffL = std::abs(peaks->mag.at(k) - valleys->mag.at(k));
         diffR = std::abs(peaks->mag.at(k) - valleys->mag.at(k+1));
         
         peaks->height.left.at(k)  = std::max(diffL, diffR);
         peaks->height.right.at(k) = meanValue(diffL, diffR);
 
-        
         slopeL = diffL / (peaks->idx.at(k) - valleys->idx.at(k));
         slopeR = diffR / (valleys->idx.at(k+1) - peaks->idx.at(k));
         
