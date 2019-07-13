@@ -88,8 +88,12 @@ int main(){
         
     };
     
-    PeaksAndValleys *test = new PeaksAndValleys(signal, 320);
-    delete test;
+    float x[10] = {2, 10, 10, 5, 8, 1, 4, 9, 8, 10};
+    int xSize = 10;
+    
+//    PeaksAndValleys *test = new PeaksAndValleys(signal, 320);
+//    delete test;
+    PeaksAndValleys test(x, xSize);
     
     return 0;
 }
