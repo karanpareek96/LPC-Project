@@ -22,18 +22,18 @@
  */
 
 typedef struct {
-    std::vector<float> left;
-    std::vector<float> right;
+    float *left;
+    float *right;
 } HEIGHT;
 
 typedef struct {
-    std::vector<float> left;
-    std::vector<float> right;
+    float *left;
+    float *right;
 } SPREAD;
 
 typedef struct {
-    std::vector<float> left;
-    std::vector<float> right;
+    float *left;
+    float *right;
 } SLOPE;
 
 /*
@@ -41,8 +41,8 @@ typedef struct {
  */
 
 typedef struct {
-    std::vector<float> idx;
-    std::vector<float> mag;
+    float *idx;
+    float *mag;
     
     HEIGHT height;
     SPREAD spread;
@@ -54,8 +54,8 @@ typedef struct {
  */
 
 typedef struct {
-    std::vector<float> idx;
-    std::vector<float> mag;
+    float *idx;
+    float *mag;
 } VALLEYS;
 
 
@@ -67,6 +67,7 @@ class PeaksAndValleys{
     
 public:
     
+    // Main init variables
     unsigned int valleyPair;
     unsigned int cntValley;
     unsigned int cntPeak;
@@ -75,12 +76,15 @@ public:
     int len;
     float **sigPointer;
     
-    HEIGHT *height;
-    SPREAD *spread;
-    SLOPE *slope;
+    // Pointer variables for script
+    float *initValue;
+    float *slopes;
+    
     PEAKS *peaks;
     VALLEYS *valleys;
-    
+//    HEIGHT *height;
+//    SPREAD *spread;
+//    SLOPE *slope;
     
     /*
      Constructor
@@ -121,7 +125,7 @@ public:
      Peak and Valley analysis
      */
     void analysis();
-
+    
 };
 
 #endif /* PeaksValleys_hpp */
