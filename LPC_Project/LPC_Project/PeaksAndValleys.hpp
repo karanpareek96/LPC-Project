@@ -74,11 +74,11 @@ public:
     unsigned int prevSlopePos;
     bool init;
     int len;
-    float **sigPointer;
+    float *sigPointer;
     
     // Pointer variables for script
-    float *initValue;
-    float *slopes;
+    float *initValue; // Length: signalLength
+    float *slopes;    // Length: signalLength-1
     
     PEAKS *peaks;
     VALLEYS *valleys;
@@ -124,7 +124,7 @@ public:
     /*
      Peak and Valley analysis
      */
-    void analysis();
+    void analysis(unsigned int cntPeak);
     
 };
 
