@@ -9,6 +9,8 @@
 #ifndef PeaksValleys_hpp
 #define PeaksValleys_hpp
 
+#define FREQ_RESP_LEN 256
+
 #include <iostream>
 #include <vector>
 
@@ -22,19 +24,21 @@
  */
 
 typedef struct {
-    float *left;
-    float *right;
+    float left[FREQ_RESP_LEN];
+    float right[FREQ_RESP_LEN];
 } HEIGHT;
 
 typedef struct {
-    float *left;
-    float *right;
+    float left[FREQ_RESP_LEN];
+    float right[FREQ_RESP_LEN];
 } SPREAD;
 
 typedef struct {
-    float *left;
-    float *right;
+    float left[FREQ_RESP_LEN];
+    float right[FREQ_RESP_LEN];
 } SLOPE;
+
+// Allocate a number
 
 /*
  Peaks struct

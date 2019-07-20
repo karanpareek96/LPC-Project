@@ -278,14 +278,14 @@ void PeaksAndValleys::analysis(unsigned int cntPeak){
     float diffL, diffR, slopeL, slopeR;
     
     // set values to 0
-    peaks->height.left = (float*) malloc(cntPeak * sizeof(float));
-    peaks->height.right = (float*) malloc(cntPeak * sizeof(float));
-    
-    peaks->slope.left = (float*) malloc(cntPeak * sizeof(float));
-    peaks->slope.right = (float*) malloc(cntPeak * sizeof(float));
-    
-    peaks->spread.left = (float*) malloc(cntPeak * sizeof(float));
-    peaks->spread.right = (float*) malloc(cntPeak * sizeof(float));
+//    peaks->height.left = (float*) malloc(cntPeak * sizeof(float));
+//    peaks->height.right = (float*) malloc(cntPeak * sizeof(float));
+//    
+//    peaks->slope.left = (float*) malloc(cntPeak * sizeof(float));
+//    peaks->slope.right = (float*) malloc(cntPeak * sizeof(float));
+//    
+//    peaks->spread.left = (float*) malloc(cntPeak * sizeof(float));
+//    peaks->spread.right = (float*) malloc(cntPeak * sizeof(float));
     
     for (k = 0; k < cntPeak; k++){
         
