@@ -108,12 +108,12 @@ public:
     /*
      Negative slope function
      */
-    void slopeNeg(float *slopes);
+    void slopeNeg();
     
     /*
      Positive slope function
      */
-    void slopePos(float *slopes);
+    void slopePos();
     
     /*
      Update Peaks
@@ -128,7 +128,7 @@ public:
     /*
      Peak and Valley analysis
      */
-    void analysis(unsigned int cntPeak);
+    void analysis();
     
 };
 

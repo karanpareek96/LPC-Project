@@ -6,8 +6,6 @@
 //  Copyright © 2019 Karan Pareek. All rights reserved.
 //
 
-// GIT TEST
-
 #include <iostream>
 #include <vector>
 #include <cmath>
@@ -45,8 +43,8 @@ void printArr(float *arr, int len){
 PeaksAndValleys::PeaksAndValleys(float *signal, unsigned int signalLength){
     
     valleyPair      = 0;
-    cntValley       = 1;
-    cntPeak         = 1;
+    cntValley       = 0;
+    cntPeak         = 0;
     prevSlopePos    = 1;
     init            = false;
     
@@ -77,55 +75,47 @@ PeaksAndValleys::~PeaksAndValleys(){
 void PeaksAndValleys::computeParams(float *signal, unsigned int signalLength){
     
     int i, j;
-    
-    // Initialize all values to -1
-    //    float initValue[signalLength];
-    
-    // use calloc to assign memory
-    initValue = (float*) calloc(signalLength, sizeof(float));
-    for (i = 0; i < signalLength; i++){
-        initValue[i] -= 1.0;
-    }
-    std::cout << "Init values: "; printArr(initValue, signalLength);
-    
     len = signalLength - 1;
     
-    // Compute slopes array (has length = len)
-    //    float slopes[len];
-    slopes = (float*) malloc(len * sizeof(float));
+    // Initialize all values to -1
+    initValue = (float*) calloc(signalLength, sizeof(float));
+    for (i = 0; i < signalLength; i++){
+        initValue[i] = -1.0;
+    }
+    
+    slopes = (float*) calloc(len, sizeof(float));
+    for (i = 0; i < len; i++){
+        slopes[i] = -1.0;
+    }
+    
+    peaks->idx   = (float*) malloc(signalLength * sizeof(float));
+    peaks->mag   = (float*) malloc(signalLength * sizeof(float));
+    memcpy(peaks->idx, initValue, signalLength * sizeof(float));
+    memcpy(peaks->mag, initValue, signalLength * sizeof(float));
+    
+    valleys->idx = (float*) malloc(signalLength * sizeof(float));
+    valleys->mag = (float*) malloc(signalLength * sizeof(float));
+    memcpy(valleys->idx, initValue, signalLength * sizeof(float));
+    memcpy(valleys->mag, initValue, signalLength * sizeof(float));
+    
+    std::cout << "\nInitialized Values: \n";
+    std::cout << "Peaks idx:   "; printArr(peaks->idx, signalLength);
+    std::cout << "Peaks mag:   "; printArr(peaks->mag, signalLength);
+    std::cout << "Valleys idx: "; printArr(valleys->idx, signalLength);
+    std::cout << "Valleys mag: "; printArr(valleys->mag, signalLength);
+    std::cout << "-----------------------------\n";
+    
+    // Compute slopes array
     for (i = 0; i < len; i++){
         slopes[i] = 0.5*(signal[i+1] - signal[i]);
     }
     std::cout << "Slope values: "; printArr(slopes, len);
     
-    // The struct values are set to -1 (slopes)
-    peaks->idx = (float*) malloc(len * sizeof(float));
-    peaks->mag = (float*) malloc(len * sizeof(float));
-    valleys->idx = (float*) malloc(len * sizeof(float));
-    valleys->mag = (float*) malloc(len * sizeof(float));
-    
-    // copy the values from slopes to each of them
-    memcpy(peaks->idx, slopes, len * sizeof(float));
-    memcpy(peaks->mag, slopes, len * sizeof(float));
-    memcpy(valleys->idx, slopes, len * sizeof(float));
-    memcpy(valleys->mag, slopes, len * sizeof(float));
-    
-    std::cout << "Peaks idx: "; printArr(peaks->idx, len);
-    std::cout << "Peaks mag: "; printArr(peaks->mag, len);
-    std::cout << "Valleys idx: "; printArr(valleys->idx, len);
-    std::cout << "Valleys mag: "; printArr(valleys->mag, len);
-    
     // Find slopes changes
     if (slopes[0] > 0)
-        slopePos(slopes);
+        slopePos();
     else
-        slopeNeg(slopes);
-    
-    std::cout << "-----------------------------\n";
-    std::cout << "Peaks idx: "; printArr(peaks->idx, len);
-    std::cout << "Peaks mag: "; printArr(peaks->mag, len);
-    std::cout << "Valleys idx: "; printArr(valleys->idx, len);
-    std::cout << "Valleys mag: "; printArr(valleys->mag, len);
+        slopeNeg();
     
     if (!prevSlopePos){
         for (j = 0; j < len; i++){
@@ -137,7 +127,7 @@ void PeaksAndValleys::computeParams(float *signal, unsigned int signalLength){
         }
     }
     
-    cntPeak = cntPeak - 1;
+//    cntPeak = cntPeak - 1;
     
     // NOTE: Take only a certain part of the array
 //    peaks.idx   = peaks.idx(1:cntPeak);
@@ -147,21 +137,20 @@ void PeaksAndValleys::computeParams(float *signal, unsigned int signalLength){
 //    valleys.mag = valleys.mag(1:(cntPeak+1));
     
     std::cout << "-----------------------------\n";
-    std::cout << "Peaks idx: "; printArr(peaks->idx, len);
-    std::cout << "Peaks mag: "; printArr(peaks->mag, len);
-    std::cout << "Valleys idx: "; printArr(valleys->idx, len);
-    std::cout << "Valleys mag: "; printArr(valleys->mag, len);
+    std::cout << "Peaks idx:   "; printArr(peaks->idx, cntPeak);
+    std::cout << "Peaks mag:   "; printArr(peaks->mag, cntPeak);
+    std::cout << "Valleys idx: "; printArr(valleys->idx, cntPeak + 1);
+    std::cout << "Valleys mag: "; printArr(valleys->mag, cntPeak + 1);
     
-    std::cout << "CntPeak value: " << cntPeak << std::endl;
+    std::cout << "cntPeak value:   " << cntPeak << std::endl;
+    std::cout << "cntValley value: " << cntValley << std::endl;
     
-    analysis(cntPeak);
+    analysis();
 }
 
-void PeaksAndValleys::slopeNeg(float *slopes){
+void PeaksAndValleys::slopeNeg(){
     
-    int i;
-    
-    for (i = 0; i < len; i++){
+    for (int i = 0; i < len; i++){
         if (sign(slopes[i]) < 0){
             if (!init)
                 continue;
@@ -184,16 +173,10 @@ void PeaksAndValleys::slopeNeg(float *slopes){
     }
 }
 
-void PeaksAndValleys::slopePos(float *slopes){
+void PeaksAndValleys::slopePos(){
     
-    int i;
-    std::cout << "len: " << len << "\n";
-    for (i = 0; i < len; i++){
-        std::cout << "i: " << i << "\n";
-        std::cout << "slopes[i]: " << slopes[i] << "\n";
+    for (int i = 0; i < len; i++){
         if (sign(slopes[i]) < 0){
-            std::cout <<"init: " << init << "\n";
-            std::cout <<"prevSlopePos: " << prevSlopePos << "\n";
             if (!init){
                 init = true;
                 prevSlopePos = 0;
@@ -205,8 +188,6 @@ void PeaksAndValleys::slopePos(float *slopes){
             }
         }
         else{
-            std::cout <<"init: " << init << "\n";
-            std::cout <<"prevSlopePos: " << prevSlopePos << "\n";
             if (!init){
                 updateValleys(i);
                 init = true;
@@ -221,10 +202,7 @@ void PeaksAndValleys::slopePos(float *slopes){
 }
 
 void PeaksAndValleys::updatePeaks(int k){
-    
-    std::cout << "k: " << k << "\n";
-    std::cout << "cntPeak: " << cntPeak << "\n";
-    
+
     peaks->idx[cntPeak] = k;
     peaks->mag[cntPeak] = sigPointer[k];
     
@@ -235,15 +213,16 @@ void PeaksAndValleys::updateValleys(int k){
     int rangeLow, rangeHigh;
     
     if (valleyPair == 0){
-        rangeLow = cntValley;
+        rangeLow  = cntValley;
         rangeHigh = cntValley + 1;
 
         valleys->idx[rangeLow]  = k;
         valleys->idx[rangeHigh] = -1;
         
-        std::cout<<"*sigPointer[k]: "<<sigPointer[k]<<"\n";
         valleys->mag[rangeLow]  = sigPointer[k];
         valleys->mag[rangeHigh] = -1;
+        
+        valleyPair = valleyPair + 1;
     }
     else if (valleyPair == 1){
         rangeLow  = cntValley;
@@ -259,7 +238,7 @@ void PeaksAndValleys::updateValleys(int k){
     }
     else if (valleyPair == 2){
         valleyPair = 1;
-        cntValley = cntValley + 2;
+        cntValley  = cntValley + 2;
         
         rangeLow  = cntValley;
         rangeHigh = cntValley + 1;
@@ -272,23 +251,14 @@ void PeaksAndValleys::updateValleys(int k){
     }
 }
 
-void PeaksAndValleys::analysis(unsigned int cntPeak){
+void PeaksAndValleys::analysis(){
     
     int k;
     float diffL, diffR, slopeL, slopeR;
     
     // set values to 0
-//    peaks->height.left = (float*) malloc(cntPeak * sizeof(float));
-//    peaks->height.right = (float*) malloc(cntPeak * sizeof(float));
-//    
-//    peaks->slope.left = (float*) malloc(cntPeak * sizeof(float));
-//    peaks->slope.right = (float*) malloc(cntPeak * sizeof(float));
-//    
-//    peaks->spread.left = (float*) malloc(cntPeak * sizeof(float));
-//    peaks->spread.right = (float*) malloc(cntPeak * sizeof(float));
     
     for (k = 0; k < cntPeak; k++){
-        
         diffL = std::abs(peaks->mag[k] - valleys->mag[k]);
         diffR = std::abs(peaks->mag[k] - valleys->mag[k+1]);
         
@@ -303,11 +273,5 @@ void PeaksAndValleys::analysis(unsigned int cntPeak){
         
         peaks->spread.left[k]  = peaks->idx[k] - valleys->idx[k];
         peaks->spread.right[k] = valleys->idx[k+1] - peaks->idx[k];
-        
-        std::cout << "-----------------------------\n";
-        std::cout << "Peaks idx: "; printArr(peaks->idx, len);
-        std::cout << "Peaks mag: "; printArr(peaks->mag, len);
-        std::cout << "Valleys idx: "; printArr(valleys->idx, len);
-        std::cout << "Valleys mag: "; printArr(valleys->mag, len);
     }
 }
