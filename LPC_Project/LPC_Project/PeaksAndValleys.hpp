@@ -45,8 +45,11 @@ typedef struct {
  */
 
 typedef struct {
-    float *idx;
+//    float *idx;
+    int *idx;
+    int *idx_final;
     float *mag;
+    float *mag_final;
     
     HEIGHT height;
     SPREAD spread;
@@ -58,8 +61,10 @@ typedef struct {
  */
 
 typedef struct {
-    float *idx;
+    int *idx;
+    int *idx_final;
     float *mag;
+    float *mag_final;
 } VALLEYS;
 
 
